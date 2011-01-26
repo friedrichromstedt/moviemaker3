@@ -107,10 +107,11 @@ class Warp(MathFunction):
         self.time = asfunction(time)
 
     def __call__(self, *args, **kwargs):
-        """Applies ``.extend.extend()`` onto the ``.time()`` with the 
-        extension by ``.retrieve()`` applied onto the ``.time()``."""
+        """Retrieves ``.time()``.  Uses ``.retrieve(time)`` to get 
+        the desired time item.  Then returns
+        ``.extend.extend(timevalue, timeobject)``."""
 
         time = self.time(*args, **kwargs)
-        retrieved = self.retrieve.retrieve(time)
+        retrieved = self.retrieve(time)
         extended = self.extend.extend(timevalue=retrieved, timeobject=time)
         return extended

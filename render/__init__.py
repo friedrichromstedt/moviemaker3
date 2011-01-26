@@ -1,1 +1,1 @@
-from moviemaker2.render.render import *
+from moviemaker2.render.renderer import *

@@ -5,7 +5,7 @@
     Function base class.
 
 *   Defining the ``Function`` class first, it is possible to define 
-    mathematical Functions in ``moviemaker2.math``, before defining the 
+    mathematical Functions in ``moviemaker2.math``, when defining the 
     ``MathFunction`` class, which has mathematical overloads using those
     mathematical Functions.
 
@@ -38,6 +38,7 @@ class Constant(Function):
         self.value = numpy.asarray(value)
 
     def __call__(self, *args, **kwargs):
+        """Returns the constant value."""
         return self.value
 
 class Identity(Function):

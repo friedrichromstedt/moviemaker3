@@ -1,5 +1,5 @@
-from moviemaker2.function import Function, asfunction
-from moviemaker2.math import MathFunction, Constant
+from moviemaker2.function import Function, asfunction, Constant
+from moviemaker2.math import MathFunction
 
 class Interp(MathFunction):
     """The pendant to ``numpy.interp()``."""

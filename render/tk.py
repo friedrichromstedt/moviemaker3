@@ -80,7 +80,7 @@ class StatusBar(Tkinter.Frame):
 
         # If all done, set to all-green except those with errors.
         if self.state_unset not in self.states_slots:
-            for (state, label) in zip(self.states, self.labels):
+            for (state, label) in zip(self.states_slots, self.labels):
                 if state == self.state_ok:
                     label.configure(background = 'green')
 
@@ -185,7 +185,7 @@ class RenderFrame(Tkinter.Frame):
 
             for index in xrange(-1, -len(capsules) - 1, -1):
                 if not capsules[index].error:
-                    self.layer_imshow.configure(X=capsules[index].image)
+                    self.layer_imshow.configure(X=capsules[index].image[::-1])
                     self.stack.render()
                     self.backend_figure.update()
                     break

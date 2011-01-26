@@ -1,6 +1,6 @@
 import numpy
 from moviemaker2.function import asfunction
-from moviameker2.math import MathFunction
+from moviemaker2.math import MathFunction
 
 class Distance(MathFunction):
     """Calculates the distance in a mesh from the origin."""
