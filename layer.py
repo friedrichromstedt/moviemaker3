@@ -12,6 +12,17 @@ from moviemaker2.function import Function, asfunction
 # Only export end-user objects:
 __all__ = ['Channel', 'AdditionLayer', 'AlphaBlendLayer']
 
+class Layer(Function):
+    
+    def __init__(self):
+        pass
+    
+    def is_ignored(self, *args, **kwargs):
+        return False
+
+    def accumulate(self, other):
+        return other
+
 class Channel(Function):
     """A channel is one channel of a layer.  It has a name and data, and 
     supports basic arithemtic by forwarding it to the data."""
@@ -78,15 +89,14 @@ class Channel(Function):
 
         return Channel(name=self.name, data=self.data(*args, **kwargs))
 
-class Layer(Function):
-    """This is the base class for all Layers.  A layer holds several result 
-    channels and an alpha group.  The colour result groups can be accessed via 
-    their name with attribute access.  They are named like the original 
-    channels without alpha.
-    
-    Layers can set themselves to "ignored" on call time.  The :class:`Stack` 
-    instance carrying out the accumulation on call time will ignore Layers 
-    which have to be ignored."""
+class AlphaLayer(Layer):
+    """This is the base class for all Layers with alpha channel.  A layer 
+    holds several result channels and an alpha group.  The result channels can 
+    be accessed via their name with attribute access.  They are named like the 
+    original channels without alpha.
+    AlphaLayers can set themselves to "ignored" on call time.  The 
+    :class:`Stack` instance carrying out the accumulation on call time will 
+    ignore Layers which have to be ignored."""
 
     def __init__(self, alpha, without_alpha=None, results=None, ignore=None):
         r"""*alpha* is the alpha channel.  Additionally, one of 
@@ -147,11 +157,11 @@ class Layer(Function):
                 return True
         return False
 
-    def __getattr__(self, name):
-        """Returns the channel with the given *name* or raises 
-        ``ValueError``."""
-
-        return self.get_channel(name)
+#    def __getattr__(self, name):
+#        """Returns the channel with the given *name* or raises 
+#        ``ValueError``."""
+#
+#        return self.get_channel(name)
 
     def accumulate(self, other):
         """Derived must overload.  Accumulate the other Layer under the
@@ -165,7 +175,7 @@ class Layer(Function):
 
         return Stack([self, other])
 
-    def __add__(self, other):
+    def __xor__(self, other):
         """If *other* is a :class:`Stack`, add *self* at the bottom of 
         *other*.  Else, return a new Stack consisting of *self* and 
         *other*."""
@@ -182,7 +192,7 @@ class Layer(Function):
         results = []
         for result in self.results:
             results.append(result(*args, **kwargs))
-        return Layer(alpha=alpha, results=results)
+        return AlphaLayer(alpha=alpha, results=results)
 
 class Stack(Layer):
     """On being called, the ``Stack`` accumulates layers each by another.
@@ -210,7 +220,7 @@ class Stack(Layer):
 
     # __or__ is okay how it comes from Layer.
     
-    def __add__(self, other):
+    def __xor__(self, other):
         """If *other* is a Stack, merge the stacks by returning a new
         stacks with the element lists concatenated.  Else, add *other* to
         the stack."""
@@ -253,6 +263,8 @@ class Stack(Layer):
         Starting with the first non-ignored element, accumulating the
         elements one after another.  The first element in ``.elements`` is
         accumulated by the next, and so on.
+
+        Returns the result of the call of the merge layer.
         
         If there are no elements to combine, raises RuntimeError."""
 
@@ -265,9 +277,9 @@ class Stack(Layer):
         layer = elements[0]
         for element in elements[1:]:
             layer = element.accumulate(layer)
-        return layer
+        return layer(*args, **kwargs)
 
-class AdditionLayer(Layer):
+class AdditionLayer(AlphaLayer):
     """This Layer type accumulates another Layer by adding up all matching
     channels."""
 
@@ -295,7 +307,7 @@ class AdditionLayer(Layer):
 
         return AdditionLayer(alpha=alpha, results=results)
 
-class AlphaBlendLayer(Layer):
+class AlphaBlendLayer(AlphaLayer):
     """This Layer type performs alpha blending."""
 
     def accumulate(self, other):
