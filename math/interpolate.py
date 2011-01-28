@@ -1,3 +1,4 @@
+import numpy
 from moviemaker2.function import Function, asfunction, Constant
 from moviemaker2.math import MathFunction
 
@@ -31,6 +32,8 @@ class Interp(MathFunction):
         left = self.left(*args, **kwargs)
         right = self.right(*args, **kwargs)
 
+        print xp, fp, x
+    
         return numpy.interp(xp=xp, fp=fp, x=x, left=left, right=right)
 
 class Spline(MathFunction):
@@ -41,7 +44,7 @@ class Spline(MathFunction):
         real-valued [0, 1] progress value of the spline."""
 
         self.points = asfunction(points)
-        progress = asfunction(progress)
+        self.progress = asfunction(progress)
 
     def __call__(self, *args, **kwargs):
         """Spline-interpolates the result of ``.points()`` at the position
@@ -53,6 +56,11 @@ class Spline(MathFunction):
         while(len(points) > 1):
             interpolated_points = []
             for (A, B) in zip(points[:-1], points[1:]):
+                # If *points* is a tuple, it will end up as a Constant.
+                # But the constituents might be Functions too, so we must 
+                # call them.
+                A = asfunction(A)(*args, **kwargs)
+                B = asfunction(B)(*args, **kwargs)
                 interpolated_points.append(A * (1 - progress) + B * progress)
             points = interpolated_points
 

@@ -82,36 +82,7 @@ class Timeline(MathFunction):
         return timeobject.retrieve(timescale=self._timescale)
 
     def __call__(self, *args, **kwargs):
-        """Returns ``.retrieve()`` with ``.time()`` as argument."""
+        """Returns ``.retrieve()`` with ``.time(...)`` as argument."""
 
         time = self.time(*args, **kwargs)
         return self.retrieve(time)
-
-class Warp(MathFunction):
-    """Warps warp the time.  They have two leaf Function attributes, one for 
-    retrieving the time, and one for extending the time.
-
-    ``Warp`` might be used like this::
-        
-        warp = Warp(retrieve=(25 * Timeline('realtime')), 
-            extend=Timeline('frametime'))
-    """
-
-    def __init__(self, retrieve=None, extend=None, time=None):
-        """*time* is used to extract the time from the arguments.  *retrieve* 
-        and *extend* are :class:`~moviemaker2.time.Timeline` objects used to
-        modify the time."""
-
-        self.retrieve = retrieve
-        self.extend = extend
-        self.time = asfunction(time)
-
-    def __call__(self, *args, **kwargs):
-        """Retrieves ``.time()``.  Uses ``.retrieve(time)`` to get 
-        the desired time item.  Then returns
-        ``.extend.extend(timevalue, timeobject)``."""
-
-        time = self.time(*args, **kwargs)
-        retrieved = self.retrieve(time)
-        extended = self.extend.extend(timevalue=retrieved, timeobject=time)
-        return extended

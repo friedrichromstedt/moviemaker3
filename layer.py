@@ -8,9 +8,10 @@ how he accumulates the accumulation result of all previous layers."""
 import copy
 import numpy
 from moviemaker2.function import Function, asfunction
+from moviemaker2.math.primitive import asmathfunction
 
 # Only export end-user objects:
-__all__ = ['Channel', 'AdditionLayer', 'AlphaBlendLayer']
+__all__ = ['Channel', 'Branch', 'AdditionLayer', 'AlphaBlendLayer']
 
 class Layer(Function):
     
@@ -23,6 +24,22 @@ class Layer(Function):
     def accumulate(self, other):
         return other
 
+    def __or__(self, other):
+        """Returns an :class:`Stack` of *self* below *other*.  *other* will
+        have the accumulating role."""
+
+        return Stack([self, other])
+
+    def __xor__(self, other):
+        """If *other* is a :class:`Stack`, add *self* at the bottom of 
+        *other*.  Else, return a new Stack consisting of *self* and 
+        *other*."""
+
+        if isinstance(other, Stack):
+            return other.copy().add_bottom(self)
+        else:
+            return Stack([self, other])
+
 class Channel(Function):
     """A channel is one channel of a layer.  It has a name and data, and 
     supports basic arithemtic by forwarding it to the data."""
@@ -31,7 +48,7 @@ class Channel(Function):
         """*data* is an array_like, *name* is some string identifying the 
         channel.  *data* will be fed through ``numpy.asarray``."""
 
-        self.data = asfunction(data)
+        self.data = asmathfunction(data)
         self.name = name
 
     def __add__(self, other):
@@ -91,9 +108,9 @@ class Channel(Function):
 
 class AlphaLayer(Layer):
     """This is the base class for all Layers with alpha channel.  A layer 
-    holds several result channels and an alpha group.  The result channels can 
-    be accessed via their name with attribute access.  They are named like the 
-    original channels without alpha.
+    holds several result channels and an alpha channel.  The result channels 
+    can be accessed via their name with attribute access.  They are named like 
+    the original channels without alpha.  
     AlphaLayers can set themselves to "ignored" on call time.  The 
     :class:`Stack` instance carrying out the accumulation on call time will 
     ignore Layers which have to be ignored."""
@@ -146,7 +163,7 @@ class AlphaLayer(Layer):
     def get_channel_names(self):
         """Returns a set of all channel names present."""
 
-        return set([channel.name for group in self.groups])
+        return set([channel.name for channel in self.results])
 
     def has_channel(self, name):
         """Returns ``True`` if there is a Channel named *name*, else 
@@ -168,22 +185,6 @@ class AlphaLayer(Layer):
         terms and conditions of *self*."""
 
         raise NotImplementedError('Derived must overload')
-
-    def __or__(self, other):
-        """Returns an :class:`Stack` of *self* below *other*.  *other* will
-        have the accumulating role."""
-
-        return Stack([self, other])
-
-    def __xor__(self, other):
-        """If *other* is a :class:`Stack`, add *self* at the bottom of 
-        *other*.  Else, return a new Stack consisting of *self* and 
-        *other*."""
-
-        if isinstance(other, Stack):
-            return other.copy().add_bottom(self)
-        else:
-            return Stack([self, other])
 
     def __call__(self, *args, **kwargs):
         """Returns a Layer with all Channels called once."""
@@ -211,7 +212,7 @@ class Stack(Layer):
         ignored.  If the stack is empty, is it to be ignored."""
 
         for element in self.elements:
-            if not elements.is_ignored():
+            if not element.is_ignored(*args, **kwargs):
                 return False
         return True
 
@@ -271,13 +272,31 @@ class Stack(Layer):
         # Generate a list of non-ignored Layers.
         elements = []
         for element in self.elements:
-            if not element.is_ignored():
+            if not element.is_ignored(*args, **kwargs):
+                #elements.append(element(*args, **kwargs))
                 elements.append(element)
 
         layer = elements[0]
         for element in elements[1:]:
             layer = element.accumulate(layer)
         return layer(*args, **kwargs)
+
+class Branch(Layer):
+    """On being called, the ``Branch`` evaluates a selector, and chooses
+    one Layer based on the value."""
+
+    def __init__(self, layers, choice):
+        """*choice* gives an index into *layers*.  Especially, *layers* might
+        be a dictionary, mapping return values onto Layers."""
+
+        self.choice = asfunction(choice)
+        self.layers = layers
+
+    def __call__(self, *args, **kwargs):
+        """Evaluates ``.choice(...)``, and calls the appropriate layer."""
+
+        choice = self.choice(*args, **kwargs)
+        return self.layers[choice](*args, **kwargs)
 
 class AdditionLayer(AlphaLayer):
     """This Layer type accumulates another Layer by adding up all matching
@@ -292,19 +311,28 @@ class AdditionLayer(AlphaLayer):
         alpha = self.alpha + other.alpha
 
         results = []
-        channel_names_self = self.get_group_names()
-        channel_names_other = other.get_group_names()
-        for channel_name in group_names_self | group_names_other:
-            if channel_name in group_names_self:
-                if channel_name in group_names_other:
-                    results.append(self.get_channel(group_name) + 
-                        other.get_channel(group_name))
+        channel_names_self = self.get_channel_names()
+        channel_names_other = other.get_channel_names()
+        for channel_name in channel_names_self | channel_names_other:
+            if channel_name in channel_names_self:
+                if channel_name in channel_names_other:
+                    results.append(self.get_channel(channel_name) + 
+                        other.get_channel(channel_name))
                 else:
-                    results.append(self.get_channel(group_name))
+                    results.append(self.get_channel(channel_name))
             else:
                 # channel is in other
-                results.append(other.get_channel(group_name))
+                results.append(other.get_channel(channel_name))
 
+        return AdditionLayer(alpha=alpha, results=results)
+
+    def __call__(self, *args, **kwargs):
+        """Returns a Layer with all Channels called once."""
+
+        alpha = self.alpha(*args, **kwargs)
+        results = []
+        for result in self.results:
+            results.append(result(*args, **kwargs))
         return AdditionLayer(alpha=alpha, results=results)
 
 class AlphaBlendLayer(AlphaLayer):
@@ -319,7 +347,7 @@ class AlphaBlendLayer(AlphaLayer):
             X = X_i \cdot (1 - \alpha_{i + 1}) + X_{i + 1}
 
         where *X* is the resulting channel, :math:`X_i` is the accumulated 
-        channel, and :math:`X_{i + 1}` is the group from this Layer.  If the 
+        channel, and :math:`X_{i + 1}` is the channel from this Layer.  If the 
         channel is not present in one of the Layers, the remaining Channel is
         used.
         
@@ -330,19 +358,28 @@ class AlphaBlendLayer(AlphaLayer):
         alpha_result = other.alpha * (1 - alpha_calc) + self.alpha
 
         results = []
-        channel_names_self = self.get_group_names()
-        channel_names_other = other.get_group_names()
-        for channel_name in group_names_self | group_names_other:
-            if channel_name in group_names_self:
-                if channel_name in group_names_other:
+        channel_names_self = self.get_channel_names()
+        channel_names_other = other.get_channel_names()
+        for channel_name in channel_names_self | channel_names_other:
+            if channel_name in channel_names_self:
+                if channel_name in channel_names_other:
                     results.append(
-                        other.get_channel(group_name) * (1 - alpha_calc) + 
-                        self.get_channel(group_name))
+                        other.get_channel(channel_name) * (1 - alpha_calc) + 
+                        self.get_channel(channel_name))
                 else:
-                    results.append(self.get_channel(group_name))
+                    results.append(self.get_channel(channel_name))
             else:
                 # channel is in other
                 results.append(
-                    other.get_channel(group_name) * (1 - alpha_calc))
+                    other.get_channel(channel_name) * (1 - alpha_calc))
 
         return AlphaBlendLayer(alpha=alpha_result, results=results)
+
+    def __call__(self, *args, **kwargs):
+        """Returns a Layer with all Channels called once."""
+
+        alpha = self.alpha(*args, **kwargs)
+        results = []
+        for result in self.results:
+            results.append(result(*args, **kwargs))
+        return AlphaBlendLayer(alpha=alpha, results=results)

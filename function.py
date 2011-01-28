@@ -31,11 +31,10 @@ class Constant(Function):
 
     def __init__(self, value):
         """
-        *value* is the value of the Constant.  It will be passed through
-        numpy.asarray().
+        *value* is the value of the Constant.
         """
 
-        self.value = numpy.asarray(value)
+        self.value = value
 
     def __call__(self, *args, **kwargs):
         """Returns the constant value."""

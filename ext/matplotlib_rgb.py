@@ -25,6 +25,7 @@ class BoundMatplotlibRGB(moviemaker2.layer.Layer):
         self.figure = matplotlib.figure.Figure()
         self.stack = matplotlayers.Stack(self.figure, left=-1, bottom=-1, 
             width=3, height=3)
+        #self.stack = matplotlayers.Stack(self.figure)
         self.stack.set_xlim((-1, 2))
         self.stack.set_ylim((-1, 2))
 
@@ -43,12 +44,15 @@ class BoundMatplotlibRGB(moviemaker2.layer.Layer):
         G = called.get_channel('G').data()
         B = called.get_channel('B').data()
 
-        image = numpy.rollaxis(numpy.asarray([R, G, B]), 0, 3)
+        image = numpy.rollaxis(numpy.asarray([R, G, B]), 0, 3).clip(0, 1)
+        #image = numpy.rollaxis(image, 0, 2)
+        #print image.shape
 
-        self.mpl_layer.configure(X=image)
+        self.mpl_layer.configure(X=image, 
+            aspect=(float(image.shape[0]) / float(image.shape[1])))
         # mpl leaves the first pixel blank (prolly for image stacking)
         self.mpl_layer.configure(extent=(-1.0/image.shape[1], 1,
             -1.0/image.shape[0], 1))
         self.stack.render()
         
-        return self.backend.output_PIL(shape=image.shape[:2])
+        return self.backend.output_PIL(shape=image.shape[:2][::-1])

@@ -1,6 +1,7 @@
-from moviemaker2.function import Function, asfunction
+from moviemaker2.function import asfunction
+from moviemaker2.math.primitive import MathFunction, asarray
 
-class Centre(Function):
+class Centre(MathFunction):
     """Composed of a mesh Function and a vector Function.  Subtracts the
     vector function from the mesh Function.
     

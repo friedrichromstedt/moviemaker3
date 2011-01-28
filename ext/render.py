@@ -123,7 +123,7 @@ class BoundRenderLayer(moviemaker2.layer.Layer):
     def _render(self, queue, framerate, file_template, startframetime,
             args, kwargs, render_queue=None):
         """*render_queue* is optional."""
-        
+       
         frametimeline = moviemaker2.time.Timeline('frametime')
         realtimeline = moviemaker2.time.Timeline('realtime')
 

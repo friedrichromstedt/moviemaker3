@@ -10,7 +10,8 @@ from moviemaker2.function import Function, Constant, Identity, asfunction
 
 # All other Function can be accessed more clearly by ordinary means or by
 # using numpy functions (numpy.sin, numpy.cos):
-__all__ = ['MathFunction', 'asmathfunction', 'asmathfunctionv']
+__all__ = ['MathFunction', 'asmathfunction', 'asmathfunctionv', 'asarray',
+    'Less', 'Greater', 'LessEqual', 'GreaterEqual', 'Equal', 'Not']
 
 class MathFunction(Function):
     """
@@ -182,12 +183,12 @@ def asmathfunction(mathfunction_like):
     of an array_like argument.
     """
 
-    if isinstance(function_like, Function):
-        return function_like
-    elif function_like is None:
-        return Identity()
+    if isinstance(mathfunction_like, Function):
+        return mathfunction_like
+    elif mathfunction_like is None:
+        return MathIdentity()
     else:
-        return Constant(function_like)
+        return MathConstant(mathfunction_like)
 
 asmathfunctionv = numpy.vectorize(asmathfunction)
 
@@ -198,8 +199,8 @@ class Sum(MathFunction):
     
     def __init__(self, one, two):
         
-        self.one = one
-        self.two = two
+        self.one = asfunction(one)
+        self.two = asfunction(two)
 
     def __call__(self, *args, **kwargs):
         
@@ -212,8 +213,8 @@ class Product(MathFunction):
     
     def __init__(self, one, two):
         
-        self.one = one
-        self.two = two
+        self.one = asfunction(one)
+        self.two = asfunction(two)
 
     def __call__(self, *args, **kwargs):
         
@@ -226,12 +227,109 @@ class Quotient(MathFunction):
     
     def __init__(self, one, two):
         
-        self.one = one
-        self.two = two
+        self.one = asfunction(one)
+        self.two = asfunction(two)
 
     def __call__(self, *args, **kwargs):
         
         return self.one(*args, **kwargs) / self.two(*args, **kwargs)
+
+class Cmp(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A, B):
+        
+        self.A = asfunction(A)
+        self.B = asfunction(B)
+
+    def __call__(self, *args, **kwargs):
+        
+        return cmp(self.A(*args, **kwargs), self.B(*args, **kwargs))
+
+class Less(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A, B):
+        
+        self.A = asfunction(A)
+        self.B = asfunction(B)
+
+    def __call__(self, *args, **kwargs):
+        
+        return self.A(*args, **kwargs) < self.B(*args, **kwargs)
+
+class Greater(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A, B):
+        
+        self.A = asfunction(A)
+        self.B = asfunction(B)
+
+    def __call__(self, *args, **kwargs):
+        
+        return self.A(*args, **kwargs) > self.B(*args, **kwargs)
+
+class LessEqual(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A, B):
+        
+        self.A = asfunction(A)
+        self.B = asfunction(B)
+
+    def __call__(self, *args, **kwargs):
+        
+        return self.A(*args, **kwargs) <= self.B(*args, **kwargs)
+
+class GreaterEqual(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A, B):
+        
+        self.A = asfunction(A)
+        self.B = asfunction(B)
+
+    def __call__(self, *args, **kwargs):
+        
+        return self.A(*args, **kwargs) >= self.B(*args, **kwargs)
+
+class Equal(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A, B):
+        
+        self.A = asfunction(A)
+        self.B = asfunction(B)
+
+    def __call__(self, *args, **kwargs):
+        
+        return self.A(*args, **kwargs) == self.B(*args, **kwargs)
+
+class Not(MathFunction):
+    """
+    Abstract comparison Function.
+    """
+
+    def __init__(self, A):
+        
+        self.A = asfunction(A)
+
+    def __call__(self, *args, **kwargs):
+        
+        return not self.A(*args, **kwargs)
 
 class Power(MathFunction):
     """
@@ -240,8 +338,8 @@ class Power(MathFunction):
     
     def __init__(self, base, exponent):
         
-        self.base = base
-        self.exponent = exponent
+        self.base = asfunction(base)
+        self.exponent = asfunction(exponent)
 
     def __call__(self, *args, **kwargs):
         
@@ -254,7 +352,7 @@ class Neg(MathFunction):
     
     def __init__(self, invertible):
         
-        self.invertible = invertible
+        self.invertible = asfunction(invertible)
 
     def __call__(self, *args, **kwargs):
         
@@ -411,4 +509,4 @@ class asarray(MathFunction):
 
         array_like = self.array_like(*args, **kwargs)
 
-        return numpy.asarray(array_like, *args, **kwargs)
+        return numpy.asarray(array_like, *self.args, **self.kwargs)
