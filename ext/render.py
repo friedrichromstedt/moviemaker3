@@ -4,7 +4,7 @@ import traceback
 import os.path
 import numpy
 import numpypic
-import moviemaker2.time
+from moviemaker2.parameter import p, Ps
 import moviemaker2.layer
 import moviemaker2.ext.render_capsules
 
@@ -13,41 +13,21 @@ import moviemaker2.ext.render_capsules
 __all__ = ['Renderer']
 
 class Render(moviemaker2.layer.Layer):
-    """Returns an :class:`BoundRenderLayer` upon accumulating another
-    Layer."""
-
-    def __init__(self, channel_name=None):
-        """The instnatiated render layer will store the PIL channel contained
-        in channel *channel_name* to HDD."""
-        
-        moviemaker2.layer.Layer.__init__(self)
-
-        self.channel_name = channel_name
-
-    def accumulate(self, layer):
-        """Returns the instantiated render layer."""
-
-        return BoundRenderLayer(layer=layer, channel_name=self.channel_name)
-
-class BoundRenderLayer(moviemaker2.layer.Layer):
     """Runs the rendering.  Initially supported timelines are ``'realtime'`` 
     and ``'frametime'``."""
 
-    def __init__(self, layer, channel_name):
-        """*layer* is the Layer to call upon rendering.  *channel_name* is the
-        channel's name containing the PIL image to store."""
-            
-        moviemaker2.layer.Layer.__init__(self)
+    def __init__(self, fn):
+        """
+        *   *fn* is the supplier of PIL images.
+        """
 
-        self.layer = layer
-        self.channel_name = channel_name
+        self.fn = fn
 
     def __call__(self, framerate, 
             directory, extension=None, prefix=None, nthreads=None,
             startrealtime=None, stoprealtime=None,
             startframetime=None, stopframetime=None,
-            render_queue=None,
-            *args, **kwargs):
+            render_queue=None):
         """
         *   *framerate* is fps.
         *   *directory* is the output directory, *extension* the filename
@@ -114,18 +94,16 @@ class BoundRenderLayer(moviemaker2.layer.Layer):
                             render_queue=render_queue,
                             framerate=framerate,
                             file_template=file_template,
-                            startframetime=startframetime,
-                            args=args,
-                            kwargs=kwargs))
+                            startframetime=startframetime))
             thread.setDaemon(True)
             thread.start()
 
     def _render(self, queue, framerate, file_template, startframetime,
-            args, kwargs, render_queue=None):
+            render_queue=None):
         """*render_queue* is optional."""
        
-        frametimeline = moviemaker2.time.Timeline('frametime')
-        realtimeline = moviemaker2.time.Timeline('realtime')
+        frametimeline = p('time/frame')
+        realtimeline = p('time/real')
 
         while not queue.empty():
             try:
@@ -133,10 +111,11 @@ class BoundRenderLayer(moviemaker2.layer.Layer):
                 frametime = queue.get(block=False)
                 realtime = float(frametime) / framerate
                 try:
-                    time = realtimeline.extend(realtime,
-                        frametimeline.extend(frametime))
+                    ps = Ps()
+                    ps = frametimeline.store(ps, frametime)
+                    ps = realtimeline.store(ps, realtime)
 
-                    image = self.layer(time=time, *args, **kwargs)
+                    image = self.fn(ps)
                     image.save(file_template % frametime)
 
                     if render_queue is not None:

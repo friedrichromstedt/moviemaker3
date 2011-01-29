@@ -152,11 +152,24 @@ class MathFunction(Function):
 
         return Indexing(items=self, index=index)
 
-#    def __getattr__(self, attribute):
-#        """Returns a :class:`AttributeAccess` instance of ``self`` with
-#        *attribute* set up."""
-#
-#        return AttributeAccess(host=self, attribute=attribute)
+    def __or__(self, other):
+        """Piping is composition of Functions.  The pipe operator is designed
+        such that the wrapping function is written last: *other* will be 
+        executed with the ouput of *self* as input."""
+
+        return MathComposedFunction(a=self, b=other)
+
+class MathComposedFunction(MathFunction):
+    """Executes one function with the output of another."""
+
+    def __init__(self, a, b):
+        """*b* will be executed with the output of *a* as input."""
+
+        self.a = asfunction(a)
+        self.b = asfunction(b)
+    
+    def __call__(self, *args, **kwargs):
+        return self.b(self.a(*args, **kwargs))
 
 class MathConstant(Constant, MathFunction):
     """:class:`~moviemaker2.function.Constant`, extended by mathematical
@@ -503,10 +516,21 @@ class asarray(MathFunction):
         self.args = args
         self.kwargs = kwargs
 
+    def reduce(self, array_like, args, kwargs):
+        """If *array_like* is scalar, returns the call of the item with *args* 
+        and *kwargs*.  Else, iterates."""
+
+        if isinstance(array_like, list) or isinstance(array_like, tuple):
+            return numpy.asarray([self.reduce(item, args, kwargs) \
+                for item in array_like])
+        else:
+            return asfunction(array_like)(*args, **kwargs)
+
     def __call__(self, *args, **kwargs):
         """Applies the args and kwargs from initialisation time onto
         ``.array_like()`` via ``numpy.asarray()``."""
 
-        array_like = self.array_like(*args, **kwargs)
+        array_like = self.reduce(self.array_like(*args, **kwargs), 
+            args, kwargs)
 
         return numpy.asarray(array_like, *self.args, **self.kwargs)

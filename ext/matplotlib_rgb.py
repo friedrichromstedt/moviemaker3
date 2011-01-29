@@ -2,26 +2,13 @@ import numpy
 import matplotlib.figure
 import matplotlayers
 import matplotlayers.backends.PIL
-import moviemaker2.layer
+from moviemaker2.math import MathFunction
 
-class MatplotlibRGB(moviemaker2.layer.Layer):
+class MatplotlibRGB(MathFunction):
     
-    # Overload Layer.__init__:
     def __init__(self):
-        moviemaker2.layer.Layer.__init__(self)
-    
-    def accumulate(self, layer):
-        return BoundMatplotlibRGB(layer)
-
-class BoundMatplotlibRGB(moviemaker2.layer.Layer):
-
-    def __init__(self, layer):
         """Initialises the figure."""
         
-        moviemaker2.layer.Layer.__init__(self)
-
-        self.layer = layer
-
         self.figure = matplotlib.figure.Figure()
         self.stack = matplotlayers.Stack(self.figure, left=-1, bottom=-1, 
             width=3, height=3)
@@ -35,18 +22,13 @@ class BoundMatplotlibRGB(moviemaker2.layer.Layer):
         self.backend = matplotlayers.backends.PIL.FigureCanvasPIL(
             self.figure)
 
-    def __call__(self, *args, **kwargs):
-        """Calls the layer."""
+    def __call__(self, layer):
+        """*layer* is supposed to be argb data with the colour index in the
+        first dimension, y in the second and x in the third.
+        
+        Return value is a PIL image."""
 
-        called = self.layer(*args, **kwargs)
-
-        R = called.get_channel('R').data()
-        G = called.get_channel('G').data()
-        B = called.get_channel('B').data()
-
-        image = numpy.rollaxis(numpy.asarray([R, G, B]), 0, 3).clip(0, 1)
-        #image = numpy.rollaxis(image, 0, 2)
-        #print image.shape
+        image = numpy.rollaxis(layer[1:], 0, 3).clip(0, 1)
 
         self.mpl_layer.configure(X=image, 
             aspect=(float(image.shape[0]) / float(image.shape[1])))

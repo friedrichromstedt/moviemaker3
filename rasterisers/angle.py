@@ -10,9 +10,9 @@ class Angle(MathFunction):
 
         self.mesh = asfunction(mesh)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, ps):
         """Returns the arctan2."""
 
-        mesh = self.mesh(*args, **kwargs)
+        mesh = self.mesh(ps)
 
         return numpy.arctan2(mesh[..., 0], mesh[..., 1])

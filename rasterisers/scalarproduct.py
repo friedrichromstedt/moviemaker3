@@ -12,11 +12,11 @@ class ScalarProduct(MathFunction):
         self.vector = asfunction(vector)
         self.mesh = asfunction(mesh)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, ps):
         """Calculates the dot product of each mesh vector and the 
         ``.vector()``."""
 
-        vector = self.vector(*args, **kwargs)
-        mesh = self.mesh(*args, **kwargs)
+        vector = self.vector(ps)
+        mesh = self.mesh(ps)
 
         return numpy.tensorproduct(mesh, vector, (-1, 0))

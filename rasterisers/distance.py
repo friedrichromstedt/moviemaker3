@@ -10,9 +10,9 @@ class Distance(MathFunction):
 
         self.mesh = asfunction(mesh)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, ps):
         """Returns the distance of the points of the mesh from the origin."""
 
-        mesh = self.mesh(*args, **kwargs)
+        mesh = self.mesh(ps)
 
         return numpy.sqrt((mesh ** 2).T.sum(axis=0).T)
