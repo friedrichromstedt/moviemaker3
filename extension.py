@@ -2,13 +2,21 @@ from moviemaker2.math import MathFunction
 from moviemaker2.function import asfunction
 
 class Extension(MathFunction):
+    """Extends paramter objects by evaluating some Function with the parameter
+    object as argument, and stores it using another ``p`` object.  Use like
+    this::
+        
+        extended = target | extension"""
     
-    def __init__(self, target, value, p):
-        self.target = asfunction(target)
+    def __init__(self, value, p):
+        """*value* is called and stored in the parameter object via *p*."""
+
         self.value = asfunction(value)
         self.p = p
 
     def __call__(self, ps):
+        """Extends *ps*, and calls *target* with the extended Ps."""
+
         value = self.value(ps)
         ps_ext = self.p.store(ps, value=value)
-        return self.target(ps_ext)
+        return ps_ext

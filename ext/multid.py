@@ -7,17 +7,19 @@ class Multid(MathFunction):
     def __init__(self, target, stack, values, p):
         """*values* is an iterable.  There will be as many layers superimposed 
         as there are items in *values*.  *p* is used to store the values from
-        *values*.  For each value, an Extension is generated, with that value,
-        which is appended to the *stack* on call time.  *target* is the 
-        supplier of layers called for each *value* by one of the 
-        Extensions."""
+        *values*.  
+        
+        Each value is stored by an Extension using *p*, and the result is fed
+        to the *target*.  The stack will contain elements for each such
+        combination."""
 
         self.stack = stack
         
         for value in values:
-            value = asfunction(value)
-            extension = Extension(target=target, value=value, p=p)
-            self.stack = self.stack ^ extension
+            # Feed the extension result to the target:
+            extended = Extension(value=value, p=p) | target
+            # Stack ``extended``:
+            self.stack ^ extended
 
     def __call__(self, ps):
         

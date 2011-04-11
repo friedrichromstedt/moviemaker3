@@ -2,9 +2,9 @@ import numpy
 import matplotlib.figure
 import matplotlayers
 import matplotlayers.backends.PIL
-from moviemaker2.math import MathFunction
+from moviemaker2.function import Function
 
-class MatplotlibRGB(MathFunction):
+class MatplotlibRGB(Function):
     
     def __init__(self):
         """Initialises the figure."""

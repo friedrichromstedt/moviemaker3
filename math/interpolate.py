@@ -32,8 +32,6 @@ class Interp(MathFunction):
         left = self.left(*args, **kwargs)
         right = self.right(*args, **kwargs)
 
-        print xp, fp, x
-    
         return numpy.interp(xp=xp, fp=fp, x=x, left=left, right=right)
 
 class Spline(MathFunction):

@@ -23,11 +23,11 @@ class Render(moviemaker2.layer.Layer):
 
         self.fn = fn
 
-    def __call__(self, framerate, 
+    def __call__(self, framerate,
             directory, extension=None, prefix=None, nthreads=None,
             startrealtime=None, stoprealtime=None,
             startframetime=None, stopframetime=None,
-            render_queue=None):
+            render_queue=None, framestep=None):
         """
         *   *framerate* is fps.
         *   *directory* is the output directory, *extension* the filename
@@ -39,6 +39,7 @@ class Render(moviemaker2.layer.Layer):
             progress.
         *   *args* and *kwargs* are handed over to the Layer this
             ``BoundRenderLayer`` was bound to upon initialisation time.
+        *   During rendering, the frametime is stepped with *framestep*.
 
         Renders to HDD and puts ImageCapsules into *render_queue* if
         given.
@@ -50,6 +51,8 @@ class Render(moviemaker2.layer.Layer):
             prefix = ''
         if nthreads is None:
             nthreads = 1
+        if framestep is None:
+            framestep = 1
         
         file_template = os.path.join(directory, 
             '%s%%06d.%s' % (prefix, extension))
@@ -77,7 +80,8 @@ class Render(moviemaker2.layer.Layer):
 
         queue = Queue.Queue()
 
-        for frametime in xrange(startframetime, stopframetime + 1):
+        for frametime in xrange(startframetime, stopframetime + 1, 
+                framestep):
             queue.put(frametime)
 
         # Announce the render ...
@@ -101,7 +105,7 @@ class Render(moviemaker2.layer.Layer):
     def _render(self, queue, framerate, file_template, startframetime,
             render_queue=None):
         """*render_queue* is optional."""
-       
+
         frametimeline = p('time/frame')
         realtimeline = p('time/real')
 

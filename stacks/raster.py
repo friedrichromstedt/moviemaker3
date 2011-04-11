@@ -1,4 +1,5 @@
 from moviemaker2.math import MathFunction, asmathfunction
+from moviemaker2.stacks.stack import Stack
 
 #
 #   Layers are simply Functions yielding ``nchannel x channelshape``
@@ -9,22 +10,12 @@ from moviemaker2.math import MathFunction, asmathfunction
 #   Stacks can be used as layers.
 #
 
-class AdditiveRasterStack(MathFunction):
+class AdditiveRasterStack(Stack):
     
     def __init__(self, background):
 
+        Stack.__init__(self)
         self.background = asmathfunction(background)
-        self.layers = []
-
-    # Stacking ...
-
-    def __xor__(self, other):
-        """Stack *other* onto *self*.  Acts in-place!  This is done so that
-        derived classes do not have to overlaod just to get the return class
-        right.  Anyway, returns *self*."""
-        
-        self.layers.append(asmathfunction(other))
-        return self
 
     def __call__(self, ps):
         """Adds up the layers."""
@@ -34,20 +25,12 @@ class AdditiveRasterStack(MathFunction):
             result = result + layer(ps)
         return result
 
-class AlphaBlendRasterStack(MathFunction):
+class AlphaBlendRasterStack(Stack):
     
     def __init__(self, background):
         
+        Stack.__init__(self)
         self.background = asmathfunction(background)
-        self.layers = []
-
-    # Stacking ...
-
-    def __xor__(self, other):
-        """Stack *other* onto *self*.  Returns *self*."""
-
-        self.layers.append(asmathfunction(other))
-        return self
 
     def __call__(self, ps):
         """Blends the layers one after the other.  The alpha channel is the

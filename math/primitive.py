@@ -6,12 +6,14 @@ will be available through the :mod:`moviemaker.math` module, too.
 """
 
 import numpy
-from moviemaker2.function import Function, Constant, Identity, asfunction
+from moviemaker2.function import Function, Constant, Identity, asfunction, \
+    fasarray, fdict
 
 # All other Function can be accessed more clearly by ordinary means or by
 # using numpy functions (numpy.sin, numpy.cos):
-__all__ = ['MathFunction', 'asmathfunction', 'asmathfunctionv', 'asarray',
-    'Less', 'Greater', 'LessEqual', 'GreaterEqual', 'Equal', 'Not']
+__all__ = ['MathFunction', 'asmathfunction', 'asmathfunctionv', 
+    'Less', 'Greater', 'LessEqual', 'GreaterEqual', 'Equal', 'InBetween', 
+    'Not', 'asmatharray', 'mathdict', 'Int']
 
 class MathFunction(Function):
     """
@@ -53,7 +55,7 @@ class MathFunction(Function):
         Function."""
 
         other = asfunction(other)
-        return Sum(self, -other)
+        return Sum(self, Neg(other))
 
     def __rsub__(self, other):
         """Returns the :class:`Sum` of the other Function with the negative of
@@ -125,6 +127,11 @@ class MathFunction(Function):
 
         return Exp(self)
 
+    def sqrt(self):
+        """Takes the square root."""
+
+        return Sqrt(self)
+
     def sum(self, *args, **kwargs):
         """Returns a :class:`Sum` of self with the arguments for calling
         ``.sum()`` given by the arguments given here."""
@@ -169,6 +176,8 @@ class MathComposedFunction(MathFunction):
         self.b = asfunction(b)
     
     def __call__(self, *args, **kwargs):
+        """Returns ``b(a(...))``."""
+
         return self.b(self.a(*args, **kwargs))
 
 class MathConstant(Constant, MathFunction):
@@ -331,6 +340,22 @@ class Equal(MathFunction):
         
         return self.A(*args, **kwargs) == self.B(*args, **kwargs)
 
+class InBetween(MathFunction):
+    """
+    A <= x < B
+    """
+
+    def __init__(self, value, low, high):
+        
+        self.value = asfunction(value)
+        self.low = asfunction(low)
+        self.high = asfunction(high)
+
+    def __call__(self, *args, **kwargs):
+        
+        return self.low(*args, **kwargs) <= self.value(*args, **kwargs) < \
+            self.high(*args, **kwargs)
+
 class Not(MathFunction):
     """
     Abstract comparison Function.
@@ -414,6 +439,20 @@ class Exp(MathFunction):
 
         exponent = self.exponent(*args, **kwargs)
         return numpy.exp(exponent)
+
+class Sqrt(MathFunction):
+    """Square root."""
+
+    def __init__(self, radicand=None):
+        """Will calculate numpy.sqrt(*radicand*(...))."""
+
+        self.radicand = asfunction(radicand)
+
+    def __call__(self, *args, **kwargs):
+        """Takes the square root."""
+
+        radicand = self.radicand(*args, **kwargs)
+        return numpy.sqrt(radicand)
 
 class SumCall(MathFunction):
     """Calles ``.sum()`` with predefined arguments.  This is intended for
@@ -504,33 +543,18 @@ class Clip(MathFunction):
         leaf = self.leaf(*args, **kwargs)
         return numpy.clip(leaf, low, high)
 
-class asarray(MathFunction):
-    """Converts ndarrays, with arbitrary arguments."""
+class asmatharray(fasarray, MathFunction):
+    pass
 
-    def __init__(self, array_like, *args, **kwargs):
-        """Converts the array_like-values Function *array_like* via
-        ``numpy.ndarray()`` with all *args* and *kwargs* given."""
+class mathdict(fdict, MathFunction):
+    pass
 
-        self.array_like = asfunction(array_like)
+class Int(MathFunction):
+    """Converts via ``int()``."""
 
-        self.args = args
-        self.kwargs = kwargs
-
-    def reduce(self, array_like, args, kwargs):
-        """If *array_like* is scalar, returns the call of the item with *args* 
-        and *kwargs*.  Else, iterates."""
-
-        if isinstance(array_like, list) or isinstance(array_like, tuple):
-            return numpy.asarray([self.reduce(item, args, kwargs) \
-                for item in array_like])
-        else:
-            return asfunction(array_like)(*args, **kwargs)
-
+    def __init__(self, target):
+        self.target = asfunction(target)
+    
     def __call__(self, *args, **kwargs):
-        """Applies the args and kwargs from initialisation time onto
-        ``.array_like()`` via ``numpy.asarray()``."""
-
-        array_like = self.reduce(self.array_like(*args, **kwargs), 
-            args, kwargs)
-
-        return numpy.asarray(array_like, *self.args, **self.kwargs)
+        """Converts the value of *target* via int()."""
+        return int(self.target(*args, **kwargs))

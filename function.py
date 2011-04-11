@@ -16,13 +16,14 @@
 import numpy
 
 # Only export for ``from xx import *`` the really useful objects:
-__all__ = ['Function', 'asfunction', 'asfunctionv']
+__all__ = ['Function', 'asfunction', 'asfunctionv', 'fasarray', 'fdict']
 
 class Function:
     """The base class of all Functions.  It is a bare class without any 
     attributes.  Used in ``isinstance(object, Function)``."""
 
-    pass
+    def __init__(self):
+        pass
 
 class Constant(Function):
     """
@@ -71,3 +72,60 @@ def asfunction(function_like):
         return Constant(function_like)
 
 asfunctionv = numpy.vectorize(asfunction)
+
+def call_recursive(obj, args, kwargs):
+    """Calls function nested somewhere inside a primitive *obj*.
+
+    *   lists and tuples: Calls on all items.
+    *   dicts: Calls on keys and values.
+
+    Constant atomic items are returned as-is.  Atomic items are items that are
+    neither lists, tuples, nor dicts."""
+
+    if isinstance(obj, list):
+        return [call_recursive(item, args, kwargs) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple([call_recursive(item, args, kwargs) for item in obj])
+    elif isinstance(obj, dict):
+        return dict([(call_recursive(key, args, kwargs), 
+            call_recursive(value, args, kwargs)) for (key, value) in \
+                obj.items()])
+    else:
+        return asfunction(obj)(*args, **kwargs)
+
+class fasarray(Function):
+    """Converts to ndarrays, with arbitrary arguments."""
+
+    def __init__(self, array_like, *args, **kwargs):
+        """Converts the array_like-valued Function *array_like* via
+        ``numpy.ndarray()`` with all *args* and *kwargs* given.  
+        *array_like* will be passed through :func:`call_recusive` on call
+        time."""
+
+        self.array_like = array_like 
+            # converted by asfunction in call_recursive
+
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self, *args, **kwargs):
+        """Applies the args and kwargs from initialisation time onto
+        ``.array_like()`` via ``numpy.asarray()``."""
+
+        array_like = call_recursive(self.array_like, args, kwargs)
+        return numpy.asarray(array_like, *self.args, **self.kwargs)
+
+class fdict(Function):
+    """Converts to dicts."""
+
+    def __init__(self, dict_like):
+        """Converts the dict_like-valued Function *dict_like* via dict() after
+        passing through :func:`call_recursive`."""
+
+        self.dict_like = dict_like
+
+    def __call__(self, *args, **kwargs):
+        """Applies the args and kwargs from initialisation time onto
+        ``.array_like()`` via ``numpy.asarray()``."""
+
+        return dict(call_recursive(self.dict_like, args, kwargs))
