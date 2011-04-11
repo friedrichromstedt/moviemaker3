@@ -3,16 +3,14 @@ import threading
 import traceback
 import os.path
 import numpy
-import numpypic
 from moviemaker3.parameter import p, Ps
-import moviemaker3.layer
 import moviemaker3.ext.render_capsules
 
 """Provides a multithreaded rendering engine."""
 
 __all__ = ['Renderer']
 
-class Render(moviemaker3.layer.Layer):
+class Render:
     """Runs the rendering.  Initially supported timelines are ``'realtime'`` 
     and ``'frametime'``."""
 
