@@ -1,8 +1,7 @@
-from moviemaker2.math import MathFunction
-from moviemaker2.function import asfunction
-from moviemaker2.extension import Extension
+from fframework import OpFunction, asfunction
+from moviemaker3.extension import Extension
 
-class Multid(MathFunction):
+class Multid(OpFunction):
 
     def __init__(self, target, stack, values, p):
         """*values* is an iterable.  There will be as many layers superimposed 

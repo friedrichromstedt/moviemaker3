@@ -1,8 +1,7 @@
 import numpy
-from moviemaker2.function import asfunction
-from moviemaker2.math import MathFunction
+from fframework import asfunction, OpFunction
 
-class ScalarProduct(MathFunction):
+class ScalarProduct(OpFunction):
     """Calculates the scalar product of the mesh points with a given vector
     Function.  Useful for plane wave calculations."""
 

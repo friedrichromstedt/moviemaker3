@@ -1,8 +1,7 @@
 import numpy
-from moviemaker2.function import asfunction
-from moviemaker2.math import MathFunction
+from fframework import asfunction, OpFunction
 
-class Angle(MathFunction):
+class Angle(OpFunction):
     """Transforms a mesh into the angle of the mesh to the x axis."""
 
     def __init__(self, mesh=None):

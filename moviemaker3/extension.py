@@ -1,7 +1,6 @@
-from moviemaker2.math import MathFunction
-from moviemaker2.function import asfunction
+from fframework import OpFunction, asfunction
 
-class Extension(MathFunction):
+class Extension(OpFunction):
     """Extends paramter objects by evaluating some Function with the parameter
     object as argument, and stores it using another ``p`` object.  Use like
     this::

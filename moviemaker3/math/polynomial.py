@@ -1,6 +1,6 @@
-from moviemaker2.function import Function, asfunction, Constant
+from fframework import OpFunction, asfunction, Constant
 
-class Polynomial(Function):
+class Polynomial(OpFunction):
     """Implements polynomials with Functions a coefficients and argument."""
 
     def __init__(self, coefficients, x=None, null=None):

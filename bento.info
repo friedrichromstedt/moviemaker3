@@ -1,4 +1,4 @@
-Name: Moviemaker2
+Name: Moviemaker3
 Version: 0.1.0b
 Author: Friedrich Romstedt
 AuthorEmail: friedrichromstedt@gmail.com
@@ -6,8 +6,9 @@ License: BSD-style
 
 Library:
     Packages:
-        moviemaker2,
-        moviemaker2.math,
-        moviemaker2.transforms,
-        moviemaker2.rasterisers,
-        moviemaker2.ext
+        moviemaker3,
+        moviemaker3.math,
+        moviemaker3.transforms,
+        moviemaker3.rasterisers,
+        moviemaker3.stacks,
+        moviemaker3.ext

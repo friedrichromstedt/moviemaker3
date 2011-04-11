@@ -3,12 +3,11 @@ Provides conversion between polar and cartesian coordinates.
 """
 
 import numpy
-from moviemaker2.function import asfunction
-from moviemaker2.math.primitive import MathFunction
+from fframework import asfunction, OpFunction
 
 __all__ = ['Polar2DtoCartesian2D', 'Cartesian2DtoPolar2D']
 
-class Polar2DtoCartesian2D(MathFunction):
+class Polar2DtoCartesian2D(OpFunction):
     """Computes cartesian 2D coordinates from 2D polar coordinates."""
 
     def __init__(self, r, phi):
@@ -28,7 +27,7 @@ class Polar2DtoCartesian2D(MathFunction):
 
         return numpy.asarray([numpy.sin(phi), numpy.cos(phi)]) * r
 
-class Cartesian2DtoPolar2D(MathFunction):
+class Cartesian2DtoPolar2D(OpFunction):
     """Calculates 2D polar coordinates from 2D cartesian coordinates."""
 
     def __init__(self, y, x):

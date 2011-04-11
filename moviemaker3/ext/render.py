@@ -4,15 +4,15 @@ import traceback
 import os.path
 import numpy
 import numpypic
-from moviemaker2.parameter import p, Ps
-import moviemaker2.layer
-import moviemaker2.ext.render_capsules
+from moviemaker3.parameter import p, Ps
+import moviemaker3.layer
+import moviemaker3.ext.render_capsules
 
 """Provides a multithreaded rendering engine."""
 
 __all__ = ['Renderer']
 
-class Render(moviemaker2.layer.Layer):
+class Render(moviemaker3.layer.Layer):
     """Runs the rendering.  Initially supported timelines are ``'realtime'`` 
     and ``'frametime'``."""
 
@@ -87,7 +87,7 @@ class Render(moviemaker2.layer.Layer):
         # Announce the render ...
 
         if render_queue is not None:
-            render_queue.put(moviemaker2.ext.render_capsules.AnnounceCapsule(
+            render_queue.put(moviemaker3.ext.render_capsules.AnnounceCapsule(
                 nframes=nframes))
 
         # Start the render ...
@@ -124,7 +124,7 @@ class Render(moviemaker2.layer.Layer):
 
                     if render_queue is not None:
                         render_queue.put(
-                            moviemaker2.ext.render_capsules.ResultCapsule(
+                            moviemaker3.ext.render_capsules.ResultCapsule(
                                 image=image, 
                                 frameindex=(frametime - startframetime)))
                 except:
@@ -133,7 +133,7 @@ class Render(moviemaker2.layer.Layer):
                     traceback.print_exc()
                     if render_queue is not None:
                         render_queue.put(
-                            moviemaker2.ext.render_capsules.ResultCapsule(
+                            moviemaker3.ext.render_capsules.ResultCapsule(
                                 image=None,
                                 frameindex=(frametime - startframetime),
                                 error=True))

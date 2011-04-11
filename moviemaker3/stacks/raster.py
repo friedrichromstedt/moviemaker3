@@ -1,5 +1,5 @@
-from moviemaker2.math import MathFunction, asmathfunction
-from moviemaker2.stacks.stack import Stack
+from fframework import OpFunction, asfunction
+from moviemaker3.stacks.stack import Stack
 
 #
 #   Layers are simply Functions yielding ``nchannel x channelshape``
@@ -15,7 +15,7 @@ class AdditiveRasterStack(Stack):
     def __init__(self, background):
 
         Stack.__init__(self)
-        self.background = asmathfunction(background)
+        self.background = asfunction(background)
 
     def __call__(self, ps):
         """Adds up the layers."""
@@ -30,7 +30,7 @@ class AlphaBlendRasterStack(Stack):
     def __init__(self, background):
         
         Stack.__init__(self)
-        self.background = asmathfunction(background)
+        self.background = asfunction(background)
 
     def __call__(self, ps):
         """Blends the layers one after the other.  The alpha channel is the

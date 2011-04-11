@@ -1,8 +1,7 @@
 import numpy
-from moviemaker2.function import asfunction
-from moviemaker2.math import MathFunction
+from fframework import asfunction, OpFunction
 
-class Distance(MathFunction):
+class Distance(OpFunction):
     """Calculates the distance in a mesh from the origin."""
 
     def __init__(self, mesh=None):

@@ -1,8 +1,7 @@
 import numpy
-from moviemaker2.function import Function, asfunction, Constant
-from moviemaker2.math import MathFunction
+from fframework import Function, asfunction, Constant, OpFunction
 
-class Interp(MathFunction):
+class Interp(OpFunction):
     """The pendant to ``numpy.interp()``."""
 
     def __init__(self, xp, fp, x, left=None, right=None):
@@ -34,7 +33,7 @@ class Interp(MathFunction):
 
         return numpy.interp(xp=xp, fp=fp, x=x, left=left, right=right)
 
-class Spline(MathFunction):
+class Spline(OpFunction):
     """Carries out spline interpolation."""
 
     def __init__(self, points, progress):

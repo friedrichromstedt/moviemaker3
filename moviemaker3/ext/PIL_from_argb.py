@@ -1,6 +1,6 @@
 import numpy
 import PIL.Image
-from moviemaker2.function import Function
+from fframework import Function
 
 class PILfromARGB(Function):
     """Generates PIL images from numpy ndarrays."""

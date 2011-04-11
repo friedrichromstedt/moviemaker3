@@ -1,7 +1,6 @@
-from moviemaker2.math import MathFunction
-from moviemaker2.function import asfunction
+from fframework import OpFunction, asfunction
 
-class Branch(MathFunction):
+class Branch(OpFunction):
     """On being called, the ``Branch`` evaluates a selector, and chooses
     one Function based on the value."""
 

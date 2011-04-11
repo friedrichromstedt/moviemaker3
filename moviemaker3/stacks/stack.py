@@ -1,6 +1,6 @@
-from moviemaker2.math import MathFunction, asmathfunction
+from fframework import OpFunction, asfunction
 
-class Stack(MathFunction):
+class Stack(OpFunction):
     """Base class for stacks with layers."""
     
     def __init__(self):
@@ -13,14 +13,14 @@ class Stack(MathFunction):
         derived classes do not have to overlaod just to get the return class
         right.  Anyway, returns *self*."""
         
-        self.layers.append(asmathfunction(other))
+        self.layers.append(asfunction(other))
         return self
 
     def add_top(self, other):
         """Stacks *other* onto *self*.  Acts in-place.  Like 
         :meth:`__xor__`."""
 
-        self.layers.append(asmathfunction(other))
+        self.layers.append(asfunction(other))
         return self
 
     def add_bottom(self, other):

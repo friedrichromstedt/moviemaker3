@@ -1,4 +1,4 @@
-from moviemaker2.math import MathFunction
+from fframework import OpFunction
 
 __all__ = ['p']
 
@@ -24,7 +24,7 @@ class Ps:
 
         return self.parameters[name]
 
-class p(MathFunction):
+class p(OpFunction):
     """Accesses a parameter by name."""
     
     def __init__(self, name):

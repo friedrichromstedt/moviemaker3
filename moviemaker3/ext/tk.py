@@ -4,7 +4,7 @@ import threading
 import Queue
 import traceback
 import numpy
-import moviemaker2.ext.render_capsules
+import moviemaker3.ext.render_capsules
 
 """Provides a Tkinter.Frame descendant capable of rendering with
 graphical feedback."""
@@ -162,10 +162,10 @@ class RenderFrame(Tkinter.Frame):
             image_capsules = []
             for capsule in capsules:
                 if isinstance(capsule,
-                        moviemaker2.ext.render_capsules.AnnounceCapsule):
+                        moviemaker3.ext.render_capsules.AnnounceCapsule):
                     self.status_bar.setup(nslots=capsule.nframes)
                 elif isinstance(capsule, 
-                        moviemaker2.ext.render_capsules.ResultCapsule):
+                        moviemaker3.ext.render_capsules.ResultCapsule):
                     if not capsule.error:
                         self.status_bar.enable(capsule.frameindex)
                     else:
