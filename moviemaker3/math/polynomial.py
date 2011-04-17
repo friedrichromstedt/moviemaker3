@@ -16,13 +16,13 @@ class Polynomial(OpFunction):
         else:
             self.null = asfunction(null)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, ps):
         """Returns the polynomial specified by ``.coefficients()`` at the
         position ``.x()``."""
 
-        coefficients = self.coefficients(*args, **kwargs)
-        x = self.x(*args, **kwargs)
-        null = self.null(*args, **kwargs)
+        coefficients = self.coefficients(ps)
+        x = self.x(ps)
+        null = self.null(ps)
 
         result = null
         for (order, coefficient) in enumerate(coefficients):

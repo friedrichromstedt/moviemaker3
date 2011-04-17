@@ -6,58 +6,52 @@ class Interp(OpFunction):
 
     def __init__(self, xp, fp, x, left=None, right=None):
         """Arguments are like for ``numpy.interp()``.  If *left* or *right* 
-        is None, *None* is handed over to ``numpy.interp()`` in ``__call__``
-        (i.e., ``None`` is not interpreted as the identity Function)."""
+        is None, *None* will be handed over to ``numpy.interp()``."""
 
         self.xp = asfunction(xp)
         self.fp = asfunction(fp)
         self.x = asfunction(x)
-        if left is None:
-            self.left = Constant(None)
-        else:
-            self.left = asfunction(left)
-        if right is None:
-            self.right = Constant(None)
-        else:
-            self.right = asfunction(right)
+        self.left = asfunction(left)
+        self.right = asfunction(right)
 
-    def __call__(self, *args, **kwargs):
-        """Calls ``numpy.interp()`` with ``.xp()``, ``.fp()``, ``.left()``,
-        ``.right()``."""
+    def __call__(self, ps):
+        """Calls ``numpy.interp()`` with ``.xp(ps)``, ``.fp(ps)``, 
+        ``.left(ps)``, ``.right(ps)``."""
 
-        xp = self.xp(*args, **kwargs)
-        fp = self.fp(*args, **kwargs)
-        x = self.x(*args, **kwargs)
-        left = self.left(*args, **kwargs)
-        right = self.right(*args, **kwargs)
+        xp = self.xp(ps)
+        fp = self.fp(ps)
+        x = self.x(ps)
+        left = self.left(ps)
+        right = self.right(ps)
 
         return numpy.interp(xp=xp, fp=fp, x=x, left=left, right=right)
 
-class Spline(OpFunction):
-    """Carries out spline interpolation."""
+class Bezier(OpFunction):
+    """Carries out Bezier interpolation."""
 
     def __init__(self, points, progress):
-        """*points* is a sequence of points of the spline.  *progress* is the
-        real-valued [0, 1] progress value of the spline."""
+        """*points* is a sequence of points of the Bezier curve.  *progress* 
+        is the real-valued [0, 1] progress value of the Bezier curve.
+        
+        The constituents of *points* must be Functions (callable).  So you
+        might use ``fframework.compound()`` to generate a list or a tuple
+        consisting of OpFunctions."""
 
         self.points = asfunction(points)
         self.progress = asfunction(progress)
 
-    def __call__(self, *args, **kwargs):
-        """Spline-interpolates the result of ``.points()`` at the position
-        ``.progress()``."""
+    def __call__(self, ps):
+        """Bezier-interpolates the result of ``.points(ps)`` at the position
+        ``.progress(ps)``."""
 
-        points = self.points(*args, **kwargs)
-        progress = self.progress(*args, **kwargs)
+        points = self.points(ps)
+        progress = self.progress(ps)
 
         while(len(points) > 1):
             interpolated_points = []
-            for (A, B) in zip(points[:-1], points[1:]):
-                # If *points* is a tuple, it will end up as a Constant.
-                # But the constituents might be Functions too, so we must 
-                # call them.
-                A = asfunction(A)(*args, **kwargs)
-                B = asfunction(B)(*args, **kwargs)
+            for (Afunc, Bfunc) in zip(points[:-1], points[1:]):
+                A = Afunc(ps)
+                B = Bfunc(ps)
                 interpolated_points.append(A * (1 - progress) + B * progress)
             points = interpolated_points
 

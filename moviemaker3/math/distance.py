@@ -1,6 +1,8 @@
 import numpy
 from fframework import asfunction, OpFunction
 
+__all__ = ['Distance']
+
 class Distance(OpFunction):
     """Calculates the distance in a mesh from the origin."""
 
@@ -10,8 +12,10 @@ class Distance(OpFunction):
         self.mesh = asfunction(mesh)
 
     def __call__(self, ps):
-        """Returns the distance of the points of the mesh from the origin."""
+        """Returns the distance of the points of the mesh from the origin.
+        
+        The spacial coordinates are in the last dimension."""
 
-        mesh = self.mesh(ps)
+        meshT = self.mesh(ps).T
 
-        return numpy.sqrt((mesh ** 2).T.sum(axis=0).T)
+        return numpy.sqrt((meshT ** 2).sum(axis=0)).T
