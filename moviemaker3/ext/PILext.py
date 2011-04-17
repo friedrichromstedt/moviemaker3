@@ -2,20 +2,16 @@ import numpy
 import PIL.Image
 from fframework import Function
 
-class PIL(Function):
+class PILext(Function):
     """Generates PIL images from numpy ndarrays."""
 
     def __init__(self, rgbindices=None, aindex=None):
         """*rgbindices* should give the indices for ``R, G, B, A`` to take 
-        from the array fed to *self.__call__*.  Default is *rgbindices = 
-        [0, 1, 2]*.  If *rgbindices* is ``None``, then the array will be 
-        intereted as grayscale, and *aindex* is ignored.  *aindex* is either 
-        ``None`` (alpha channel opaque) or the index where to take the alpha 
-        channel from."""
+        from the array fed to *self.__call__*.  If *rgbindices* is ``None``, 
+        then the array will be intereted as grayscale, and *aindex* is 
+        ignored.  *aindex* is either ``None`` (alpha channel opaque) or the 
+        index where to take the alpha channel from."""
         
-        if rgbindices is None:
-            rgbindices = [0, 1, 2]
-
         Function.__init__(self)
 
         self.rgbindices = rgbindices

@@ -40,7 +40,7 @@ class Cartesian2DtoPolar2D(OpFunction):
         """Calculates the polar coordinates ``[r, phi]`` from the cartesian 
         coordinates ``[y, x]``.
 
-        The angle is calculates mathematically positive starting in the 
+        The angle is calculated mathematically positive starting in the 
         direction os :math:`+x` with phi=0."""
         
         mesh = self.mesh(*args, **kwargs)

@@ -120,7 +120,7 @@ class RenderFrame(Tkinter.Frame):
         self.canvas.pack(side=Tkinter.TOP)
         self.photo_id = None
 
-        self.spacer = Tkinter.Label(self, text='Moviemaker2 Output')
+        self.spacer = Tkinter.Label(self, text='Moviemaker3 Output')
         self.spacer.pack(side=Tkinter.TOP)
     
         self.start()
