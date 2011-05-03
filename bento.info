@@ -1,5 +1,5 @@
 Name: Moviemaker3
-Version: 0.1.0b
+Version: 0.1.0b1
 Author: Friedrich Romstedt
 AuthorEmail: friedrichromstedt@gmail.com
 License: BSD-style
@@ -8,7 +8,5 @@ Library:
     Packages:
         moviemaker3,
         moviemaker3.math,
-        moviemaker3.transforms,
-        moviemaker3.rasterisers,
         moviemaker3.stacks,
         moviemaker3.ext

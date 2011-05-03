@@ -1,5 +1,5 @@
 from fframework import OpFunction, asfunction
-from moviemaker3.extension import Extension
+from moviemaker3.assignment import Assignment
 
 class Multid(OpFunction):
 
@@ -16,7 +16,7 @@ class Multid(OpFunction):
         
         for value in values:
             # Feed the extension result to the target:
-            extended = Extension(value=value, p=p) | target
+            extended = Assignment(p=p, value=value) | target
             # Stack ``extended``:
             self.stack ^ extended
 

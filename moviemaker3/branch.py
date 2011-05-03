@@ -4,15 +4,25 @@ class Branch(OpFunction):
     """On being called, the ``Branch`` evaluates a selector, and chooses
     one Function based on the value."""
 
-    def __init__(self, fns, choice):
-        """*choice* gives an index into *fns*.  Especially, *fns* might
-        be a dictionary, mapping return values onto Functions."""
+    def __init__(self, key, choices=None):
+        """*key* gives an index into *choices*.  *choices* is supposed to be a 
+        dictionary, mapping return values onto Functions, and defaults to the 
+        empty dict."""
 
-        self.choice = asfunction(choice)
-        self.fns = fns
+        if choices is None:
+            choices = {}
+
+        self.key = asfunction(key)
+        self.choices = choices
+
+    def add_branch(self, key, choice):
+        """Registers Function *choice* under choice key *key*."""
+
+        self.choices[key] = choice
 
     def __call__(self, ps):
-        """Evaluates ``.choice(ps)`` and calls the appropriate function."""
+        """Evaluates ``.key(ps)`` and calls the appropriate function.  The
+        item from the dict will be passed through ``asfunction``."""
 
-        choice = self.choice(ps)
-        return asfunction(self.fns[choice])(ps)
+        key = self.key(ps)
+        return asfunction(self.choices[key])(ps)
