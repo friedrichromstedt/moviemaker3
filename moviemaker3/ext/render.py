@@ -2,6 +2,7 @@ import Queue
 import threading
 import traceback
 import os.path
+import logging
 import numpy
 from moviemaker3.parameter import p, Ps
 import moviemaker3.ext.render_capsules
@@ -9,6 +10,8 @@ import moviemaker3.ext.render_capsules
 """Provides a multithreaded rendering engine."""
 
 __all__ = ['Renderer']
+
+logger = logging.getLogger('mm3.ext.render')
 
 class Render:
     """Runs the rendering.  Initially supported timelines are ``'realtime'`` 
@@ -112,6 +115,8 @@ class Render:
                 # Another thread may have raced, we have to not-block.
                 frametime = queue.get(block=False)
                 realtime = float(frametime) / framerate
+                logger.info('Rendering frame %d at %f' % (frametime, 
+                    realtime))
                 try:
                     ps = Ps()
                     ps = frametimeline.store(ps, frametime)
