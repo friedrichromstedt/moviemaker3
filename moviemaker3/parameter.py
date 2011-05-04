@@ -1,4 +1,4 @@
-from fframework import MathFunction
+from fframework import OpFunction
 
 __all__ = ['p']
 
@@ -57,10 +57,10 @@ class Ps(dict):
 
         (root, leaf) = self.split(name)
         if leaf is None:
-            self.parameters[root] = value
+            dict.__setitem__(self, root, value)
         else:
-            self.parameters.setdefault(root, Ps())
-            self.parameters[root].extend(leaf, value)
+            self.setdefault(root, Ps())
+            self[root].extend(leaf, value)
         return self
 
     def extended(self, name, value):
@@ -73,7 +73,7 @@ class Ps(dict):
         """Alias for ``.extend()`` for syntax like e.g. 
         ``ps['hi'] = 'world'``."""
 
-        return self.extend(name, value)
+        return self.extend(key, value)
 
     def copy(self):
         """Returns a ``Ps`` with copied ``.parameters``.  All ``Ps`` objects
@@ -94,16 +94,16 @@ class Ps(dict):
         root = components[0]
         leaf = '/'.join(components[1:])
         if len(components) == 1:
-            return self.parameters[root]
+            return dict.__getitem__(self, root)
         else:
-            return self.parameters[root][leaf]
+            return dict.__getitem__(self, root)[leaf]
 
     def __getitem__(self, key):
         """Alias for ``.retrieve()`` for syntax like e.g. ``ps['foobar']``."""
 
         return self.retrieve(key)
 
-class p(MathFunction):
+class p(OpFunction):
     """Accesses a parameter by name."""
     
     def __init__(self, name):
