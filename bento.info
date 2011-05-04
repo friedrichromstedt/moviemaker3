@@ -2,7 +2,7 @@ Name: Moviemaker3
 Version: 0.1.0b1
 Author: Friedrich Romstedt
 AuthorEmail: friedrichromstedt@gmail.com
-License: BSD-style
+License: MIT
 
 Library:
     Packages:
@@ -10,3 +10,6 @@ Library:
         moviemaker3.math,
         moviemaker3.stacks,
         moviemaker3.ext
+
+ExtraSourceFiles:
+    LICENSE
